@@ -6,8 +6,6 @@ import { OpenCvProvider } from 'opencv-react';
 import BlurPage from './BlurPage';
 
 function App() {
-
-
   return (
     <OpenCvProvider>
       <BlurPage />
