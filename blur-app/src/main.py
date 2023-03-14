@@ -1,8 +1,10 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, send_file
 from flask_cors import CORS
 import base64
 import cv2
 import numpy as np
+import os
+import io
 
 from camera import VideoCamera
 
@@ -17,20 +19,6 @@ face_detector = cv2.FaceDetectorYN_create(
   0.1      # NMS threshold
 )
 
-# @app.route('/')
-# def index():
-#     return render_template('index.js')
-    
-def gen(camera):
-    while True:
-        frame = camera.get_frame()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-               
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen(VideoCamera()),
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -45,7 +33,6 @@ def upload():
     if channels == 4:
         img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
 
-
     height, width, _ = img.shape
     face_detector.setInputSize((width, height))
 
@@ -58,11 +45,12 @@ def upload():
       x = max(0, x)
       y = max(0, y)
       img[y:y+h, x:x+w] = cv2.blur(img[y:y+h, x:x+w], (50, 50))
-    
-    _, encoded_image = cv2.imencode('.jpg', img)
 
-    # Return the encoded image as a response from the Flask server
-    return Response(encoded_image.tobytes(), mimetype='image/jpeg')
+    buf = cv2.imencode('.jpg', img)[1]
+    b64 = base64.b64encode(buf).decode()
+
+    return jsonify({"img": b64})
+    # return send_file(bytesa, mimetype='image/jpeg')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
