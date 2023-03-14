@@ -19,6 +19,7 @@ face_detector = cv2.FaceDetectorYN_create(
   0.1      # NMS threshold
 )
 
+c = 0
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -48,9 +49,7 @@ def upload():
 
     buf = cv2.imencode('.jpg', img)[1]
     b64 = base64.b64encode(buf).decode()
-
     return jsonify({"img": b64})
-    # return send_file(bytesa, mimetype='image/jpeg')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
