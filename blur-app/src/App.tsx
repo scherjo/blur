@@ -1,6 +1,26 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import axios from "axios";
+import styled from 'styled-components';
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+`;
+
+const Horizontal = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+`;
+
+const Title = styled.h1`
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  font-family: Arial, Helvetica, sans-serif;
+`;
 
 function App() {
   const webcamRef = useRef(null);
@@ -33,13 +53,15 @@ function App() {
   }, [captureImage]);
 
   return (
-    <div>
-      <h2>Real-time Face Blurring</h2>
-      <Webcam
-        ref={webcamRef}
-      />
-      {processedImage && <img src={`data:image/jpeg;base64,${processedImage}`} alt="Processed" />}
-    </div>
+    <Container>
+      <Title>Real-time AI Face Blurring</Title>
+      <Horizontal>
+        {/* <WebcamWrapper> */}
+          <Webcam ref={webcamRef} />
+        {/* </WebcamWrapper> */}
+          {processedImage && <img src={`data:image/jpeg;base64,${processedImage}`} alt="Processed" />}
+      </Horizontal>
+    </Container>
   );
 }
 
