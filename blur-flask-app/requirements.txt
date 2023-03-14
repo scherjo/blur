@@ -1,0 +1,6 @@
+Flask==2.2.2
+flask_cors==3.0.10
+flask_sock==0.6.0
+numpy==1.21.5
+opencv_python_headless==4.7.0.72
+gunicorn==20.1.0
