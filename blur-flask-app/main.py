@@ -19,11 +19,11 @@ face_detector = cv2.FaceDetectorYN_create(
   0.1      # NMS threshold
 )
 
-
-def blur_image(image_data):
+def blur_image(image_data, score_threshold=0.4):
   """ Receives and outputs base64"""
   image_data = base64.b64decode(image_data.split(",")[1])
 
+  face_detector.setScoreThreshold(score_threshold)
   img = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_COLOR)
 
   channels = 1 if len(img.shape) == 2 else img.shape[2]
@@ -37,13 +37,14 @@ def blur_image(image_data):
 
   _, faces = face_detector.detect(img)
   faces = faces if faces is not None else []
-  # Draw rectangle around the faces
+  
+  # Blur faces
   for face in faces:
     box = list(map(int, face[:4]))
     x, y, w, h = box
     x = max(0, x)
     y = max(0, y)
-    img[y:y+h, x:x+w] = cv2.blur(img[y:y+h, x:x+w], (50, 50))
+    img[y:y+h, x:x+w] = cv2.blur(img[y:y+h, x:x+w], (50, 50), 0)
 
   buf = cv2.imencode('.jpg', img)[1]
   b64 = base64.b64encode(buf).decode()
@@ -52,13 +53,14 @@ def blur_image(image_data):
 @app.route("/upload", methods=["POST"])
 def upload():
     image_data = request.json["image"]
+    thresh = request.json["score_threshold"]
     if not image_data:
       return Response(
         "No image given",
         status=400,
       )
     
-    b64 = blur_image(image_data)
+    b64 = blur_image(image_data, thresh)
     return jsonify({"img": b64})
 
 @sock.route("/blur_ws")
@@ -76,4 +78,4 @@ def blur_ws(sock):
     sock.send(b64)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, threaded=True, use_reloader=False)
