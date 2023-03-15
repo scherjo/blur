@@ -3,10 +3,10 @@ from flask_cors import CORS
 from flask_sock import Sock
 import base64
 import cv2
-import json
-import io
 import numpy as np
 import os
+import io
+import json
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})

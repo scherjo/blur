@@ -9,12 +9,13 @@ const appURL = `ws${isSafari ? 's' : ''}://localhost:5001/blur_ws`;  // Safari r
 function App() {
   const webcamRef = useRef<any>(null);
   const [processedImage, setProcessedImage] = useState<any>(null);
-  const { sendMessage, lastMessage, readyState } = useWebSocket(appURL, {
+  const { sendJsonMessage, lastMessage, readyState } = useWebSocket(appURL, {
     shouldReconnect: () => true,
     reconnectInterval: 1,
   });
   
   const TIME_BETWEEN_FRAMES_MS = 200;
+  const SCORE_THRESHOLD = 0.5;
 
   useEffect(() => {
     if (lastMessage) {
@@ -26,10 +27,10 @@ function App() {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc && readyState === ReadyState.OPEN) {
-        sendMessage(imageSrc);
+        sendJsonMessage({image: imageSrc, score_threshold: SCORE_THRESHOLD});
       }
     }
-  }, [readyState, sendMessage]); 
+  }, [readyState, sendJsonMessage]); 
 
   useEffect(() => {
     const intervalId = setInterval(captureImage, TIME_BETWEEN_FRAMES_MS);
