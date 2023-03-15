@@ -1,38 +1,20 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import Style from "./App.module.css";
-// @ts-ignore
-import styled from 'styled-components';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 2rem;
-`;
-
-const Horizontal = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-`;
-
-const Title = styled.h1`
-  font-size: 3rem;
-  margin-bottom: 2rem;
-  font-family: Arial, Helvetica, sans-serif;
-`;
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+const appURL = `ws${isSafari ? 's' : ''}://localhost:5001/blur_ws`;  // Safari requires wss, which slows performance
 
 function App() {
   const webcamRef = useRef<any>(null);
   const [processedImage, setProcessedImage] = useState<any>(null);
-  const { sendMessage, lastMessage, readyState } = useWebSocket('ws://blur-app.fly.dev/blur_ws', {
-    shouldReconnect: (closeEvent) => true,
+  const { sendMessage, lastMessage, readyState } = useWebSocket(appURL, {
+    shouldReconnect: () => true,
     reconnectInterval: 1,
   });
   
-  const TIME_BETWEEN_FRAMES_MS = 100;
+  const TIME_BETWEEN_FRAMES_MS = 200;
 
   useEffect(() => {
     if (lastMessage) {
@@ -58,15 +40,20 @@ function App() {
   }, [captureImage]);
 
   return (
-    <Container>
-      <Title>Real-time AI Face Blurring</Title>
-      <Horizontal>
-        {/* <WebcamWrapper> */}
-          <Webcam ref={webcamRef} mirrored={true} />
-        {/* </WebcamWrapper> */}
-          {processedImage && <img src={`data:image/jpeg;base64,${processedImage}`} alt="Processed" />}
-      </Horizontal>
-    </Container>
+    <div>
+      <h1>Real-time AI Face Blurring</h1>
+      <Webcam
+            className={Style.hidden}
+            ref={webcamRef}
+            mirrored={true}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            screenshotQuality={0.5}
+          />
+      <div className={Style.flexboxRow}>
+          {processedImage && <img src={`data:image/jpeg;base64,${processedImage}`} alt="Processed"/>}
+      </div>
+    </div>
   );
 }
 
