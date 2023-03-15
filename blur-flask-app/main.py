@@ -1,11 +1,9 @@
-from flask import Flask, request, Response, jsonify, send_file
+from flask import Flask, request, Response, jsonify
 from flask_cors import CORS
 from flask_sock import Sock
 import base64
 import cv2
 import numpy as np
-import os
-import io
 import json
 
 app = Flask(__name__)
@@ -82,3 +80,4 @@ def blur_ws(sock):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
+    
