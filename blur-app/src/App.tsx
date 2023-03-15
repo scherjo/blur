@@ -1,15 +1,16 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { Slider } from '@mui/material';
 import Webcam from 'react-webcam';
 import appStyle from './App.style.js';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 const APP_URL = 'wss://blur-app.fly.dev/blur_ws';
 const TIME_BETWEEN_FRAMES_MS = 200;
-const SCORE_THRESHOLD = 0.5;
 
 function App() {
   const webcamRef = useRef<any>(null);
   const [processedImage, setProcessedImage] = useState<any>(null);
+  const [scoreThreshold, setScoreThreshold] = useState(0.5);
   const { sendJsonMessage, lastMessage, readyState } = useWebSocket(APP_URL, {
     shouldReconnect: () => true,
     reconnectInterval: 1,
@@ -25,10 +26,10 @@ function App() {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc && readyState === ReadyState.OPEN) {
-        sendJsonMessage({image: imageSrc, score_threshold: SCORE_THRESHOLD});
+        sendJsonMessage({image: imageSrc, score_threshold: scoreThreshold});
       }
     }
-  }, [readyState, sendJsonMessage]); 
+  }, [readyState, sendJsonMessage, scoreThreshold]); 
 
   useEffect(() => {
     const intervalId = setInterval(captureImage, TIME_BETWEEN_FRAMES_MS);
@@ -56,11 +57,28 @@ function App() {
         // @ts-ignore
         style={appStyle.flexboxRow}>
         {processedImage &&
-        <img
-          style={appStyle.shadow}
-          src={`data:image/jpeg;base64,${processedImage}`}
-          alt='Processed'
-        />}
+        <div>
+          <img
+            style={appStyle.shadow}
+            src={`data:image/jpeg;base64,${processedImage}`}
+            alt='Processed'
+          />
+          <Slider
+            aria-label="Face detection threshold"
+            value={scoreThreshold}
+            onChange={(event, value) => {
+              if (typeof value === 'number') {
+                setScoreThreshold(value);
+              }
+            }}
+            getAriaValueText={(val) => `${val}`}
+            valueLabelDisplay="auto"
+            step={0.01}
+            min={0}
+            max={1}
+          />
+          </div>
+        }
       </div>
     </div>
   );
