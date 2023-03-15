@@ -1,20 +1,19 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
-import Style from "./App.module.css";
+import appStyle from './App.style.js';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
-const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-const appURL = `ws${isSafari ? 's' : ''}://localhost:5001/blur_ws`;  // Safari requires wss, which slows performance
+const APP_URL = 'wss://blur-app.fly.dev/blur_ws';
+const TIME_BETWEEN_FRAMES_MS = 200;
+const SCORE_THRESHOLD = 0.5;
 
 function App() {
   const webcamRef = useRef<any>(null);
   const [processedImage, setProcessedImage] = useState<any>(null);
-  const { sendMessage, lastMessage, readyState } = useWebSocket(appURL, {
+  const { sendJsonMessage, lastMessage, readyState } = useWebSocket(APP_URL, {
     shouldReconnect: () => true,
     reconnectInterval: 1,
   });
-  
-  const TIME_BETWEEN_FRAMES_MS = 200;
 
   useEffect(() => {
     if (lastMessage) {
@@ -26,10 +25,10 @@ function App() {
     if (webcamRef.current) {
       const imageSrc = webcamRef.current.getScreenshot();
       if (imageSrc && readyState === ReadyState.OPEN) {
-        sendMessage(imageSrc);
+        sendJsonMessage({image: imageSrc, score_threshold: SCORE_THRESHOLD});
       }
     }
-  }, [readyState, sendMessage]); 
+  }, [readyState, sendJsonMessage]); 
 
   useEffect(() => {
     const intervalId = setInterval(captureImage, TIME_BETWEEN_FRAMES_MS);
@@ -40,18 +39,28 @@ function App() {
   }, [captureImage]);
 
   return (
-    <div>
-      <h1>Real-time AI Face Blurring</h1>
+    <div
+      // @ts-ignore
+      style={appStyle.background}>
+      <h1 style={appStyle.title}>Real-time AI Face Blurring</h1>
       <Webcam
-            className={Style.hidden}
-            ref={webcamRef}
-            mirrored={true}
-            audio={false}
-            screenshotFormat="image/jpeg"
-            screenshotQuality={0.5}
-          />
-      <div className={Style.flexboxRow}>
-          {processedImage && <img src={`data:image/jpeg;base64,${processedImage}`} alt="Processed"/>}
+        // @ts-ignore
+        style={appStyle.hidden}
+        ref={webcamRef}
+        mirrored={true}
+        audio={false}
+        screenshotFormat='image/jpeg'
+        screenshotQuality={0.5}
+      />
+      <div
+        // @ts-ignore
+        style={appStyle.flexboxRow}>
+        {processedImage &&
+        <img
+          style={appStyle.shadow}
+          src={`data:image/jpeg;base64,${processedImage}`}
+          alt='Processed'
+        />}
       </div>
     </div>
   );
