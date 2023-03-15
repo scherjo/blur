@@ -3,9 +3,10 @@ from flask_cors import CORS
 from flask_sock import Sock
 import base64
 import cv2
+import json
+import io
 import numpy as np
 import os
-import io
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -66,7 +67,9 @@ def upload():
 @sock.route("/blur_ws")
 def blur_ws(sock):
   while True:
-    image_data = sock.receive()
+    data = json.loads(sock.receive())
+    image_data = data["image"]
+    thresh = data["score_threshold"]
 
     if not image_data:
       return Response(
@@ -74,8 +77,8 @@ def blur_ws(sock):
         status=400,
       )
 
-    b64 = blur_image(image_data)
+    b64 = blur_image(image_data, thresh)
     sock.send(b64)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, threaded=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=5001, threaded=True, use_reloader=False)
