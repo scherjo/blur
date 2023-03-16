@@ -46,7 +46,7 @@ const appStyle = {
     fontSize: fonts.FONT_SIZE_XSMALL,
     color: colors.TEXT_SECONDARY,
     paddingLeft: "10px",
-    marginTop: 0,
+    marginTop: 5,
   },
 
   sectionTitle: {

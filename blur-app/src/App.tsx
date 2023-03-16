@@ -2,9 +2,9 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import appStyle from './App.style.js';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
-import { Slider, Skeleton } from '@mui/material';
+import { Slider, Skeleton, Typography } from '@mui/material';
 
-const APP_URL = 'ws://localhost:5001/blur_ws';
+const APP_URL = 'wss://blur-app.fly.dev/blur_ws';
 const TIME_BETWEEN_FRAMES_MS = 200;
 
 function App() {
@@ -72,6 +72,7 @@ function App() {
                 setScoreThreshold(value);
               }
             }}
+            valueLabelFormat={(val) => `Confidence threshold: ${val}`}
             getAriaValueText={(val) => `${val}`}
             valueLabelDisplay="auto"
             step={0.01}
@@ -103,7 +104,7 @@ function App() {
           style={appStyle.centered}>
           <h2 style={appStyle.sectionTitle}>Problem Description:</h2>
           <p style={appStyle.paragraph}>
-            Problem description: It’s common to see images and videos where faces need to be blurred, from footage captured in a public place to respect general privacy, to interviews where anonymity is required, to Google Street View images containing people. However, the process of blurring faces manually, especially in videos with constant movement, can be tedious. We set out to create a tool for blurring faces in images and videos automatically, with the goal being that it would be efficient and accurate enough to be practical and useful in these real-world applications.
+            It’s common to see images and videos where faces need to be blurred, from footage captured in a public place to respect general privacy, to interviews where anonymity is required, to Google Street View images containing people. However, the process of blurring faces manually, especially in videos with constant movement, can be tedious. We set out to create a tool for blurring faces in images and videos automatically, with the goal being that it would be efficient and accurate enough to be practical and useful in these real-world applications.
           </p>
 
           <h2 style={appStyle.sectionTitle}>Previous Work:</h2>
